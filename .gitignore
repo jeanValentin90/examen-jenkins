@@ -1,0 +1,5 @@
+cast-service/app/__pycache__
+cast-service/app/api/__pycache__
+movie-service/app/__pycache__
+movie-service/app/api/__pycache__
+helm/templatesSave

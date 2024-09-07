@@ -1,0 +1,41 @@
+movieService:
+  image:
+    repository: jeanvalentin90/examen-jenkins_movie_service
+    tag: latest
+  service:
+    type: ClusterIP
+    port: 8000
+  env:
+    databaseUri: "postgresql://movie_db_username:movie_db_password@db-service.dev.svc.cluster.local:8000/movie_db_dev"
+    castServiceHostUrl: "http://cast-service:8000/"
+
+castService:
+  image:
+    repository: jeanvalentin90/examen-jenkins_cast_service
+    tag: latest
+  service:
+    type: ClusterIP
+    port: 8000  
+  env:
+    databaseUri: "postgresql://movie_db_username:movie_db_password@db-service:5432/movie_db_dev"
+
+nginx:
+  image:
+    repository: nginx
+    tag: latest
+  service:
+    type: NodePort
+    port: 8080
+
+
+postgres:
+  image: postgres:13
+  username: movie_db_username
+  usernameb64: bW92aWVfZGJfdXNlcm5hbWU=
+  password: movie_db_password
+  passwordb64: bW92aWVfZGJfcGFzc3dvcmQ=
+  database: movie_db_dev
+  databaseb64: bW92aWVfZGJfZGV2Cg==
+
+persistentVolume:
+  storage: 1Gi

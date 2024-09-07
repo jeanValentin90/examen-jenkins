@@ -1,8 +1,8 @@
 pipeline {
 environment { // Declaration of environment variables
 DOCKER_ID = "jeanvalentin90" // replace this with your docker-id
-DOCKER_IMAGE_CAST = "examejvalentin-cast"
-DOCKER_IMAGE_MOVIE = "examejvalentin-cast"
+DOCKER_IMAGE_CAST = "examen-jenkins_cast_service"
+DOCKER_IMAGE_MOVIE = "examen-jenkins_movie_service"
 DOCKER_TAG = "v.${BUILD_ID}.0" // we will tag our images with the current build in order to increment the value by 1 with each new build
 }
 agent any // Jenkins will be able to select all available agents
@@ -11,33 +11,13 @@ stages {
             steps {
                 script {
                 sh '''
+                 cd cast-service
                  docker rm -f jenkins
                  docker build -t $DOCKER_ID/$DOCKER_IMAGE_CAST:$DOCKER_TAG .
                 sleep 6
                 '''
                 }
             }
-        }
-        stage('Docker run Cast Service'){ // run container from our builded image
-                steps {
-                    script {
-                    sh '''
-                    docker run -d -p 80:80 --name jenkins $DOCKER_ID/$DOCKER_IMAGE_CAST:$DOCKER_TAG
-                    sleep 10
-                    '''
-                    }
-                }
-            }
-
-        stage('Test Acceptance  Cast Service'){ // we launch the curl command to validate that the container responds to the request
-            steps {
-                    script {
-                    sh '''
-                    curl localhost
-                    '''
-                    }
-            }
-
         }
         stage('Docker Push  Cast Service'){ //we pass the built image to our docker hub account
             environment
@@ -62,33 +42,13 @@ stages {
             steps {
                 script {
                 sh '''
-                 docker rm -f jenkins
+                 cd movie-service
+                 docker rm -f jenkins-movie
                  docker build -t $DOCKER_ID/$DOCKER_IMAGE_MOVIE:$DOCKER_TAG .
                 sleep 6
                 '''
                 }
             }
-        }
-        stage('Docker run movie Service'){ // run container from our builded image
-                steps {
-                    script {
-                    sh '''
-                    docker run -d -p 80:80 --name jenkins $DOCKER_ID/$DOCKER_IMAGE_MOVIE:$DOCKER_TAG
-                    sleep 10
-                    '''
-                    }
-                }
-            }
-
-        stage('Test Acceptance  movie Service'){ // we launch the curl command to validate that the container responds to the request
-            steps {
-                    script {
-                    sh '''
-                    curl localhost
-                    '''
-                    }
-            }
-
         }
         stage('Docker Push  Cast Service'){ //we pass the built image to our docker hub account
             environment
@@ -108,7 +68,7 @@ stages {
 
         }
 
-stage('Deploiement en dev'){
+stage('Deploiement en ej-dev'){
         environment
         {
         KUBECONFIG = credentials("config") // we retrieve  kubeconfig from secret file called config saved on jenkins
@@ -120,29 +80,15 @@ stage('Deploiement en dev'){
                 mkdir .kube
                 ls
                 cat $KUBECONFIG > .kube/config
-                cp cast-service/values.yaml values.yml
+                cp helm/values.yaml values.yml
                 cat values.yml
                 sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" values.yml
-                helm upgrade --install app cast-service --values=values.yml --namespace dev
-                '''
-                }
-            }
-            steps {
-                script {
-                sh '''
-                rm -Rf .kube
-                mkdir .kube
-                ls
-                cat $KUBECONFIG > .kube/config
-                cp movie-service/values.yaml values.yml
-                cat values.yml
-                sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" values.yml
-                helm upgrade --install app movie-service --values=values.yml --namespace dev
+                helm upgrade --install app ej-microservices --values=values.yml --namespace ej-dev
                 '''
                 }
             }
         }
-stage('Deploiement en staging'){
+stage('Deploiement en ej-staging'){
         environment
         {
         KUBECONFIG = credentials("config") // we retrieve  kubeconfig from secret file called config saved on jenkins
@@ -154,39 +100,24 @@ stage('Deploiement en staging'){
                 mkdir .kube
                 ls
                 cat $KUBECONFIG > .kube/config
-                cp cast-service/values.yaml values.yml
+                cp helm/values.yaml values.yml
                 cat values.yml
                 sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" values.yml
-                helm upgrade --install app cast-service --values=values.yml --namespace staging
+                helm upgrade --install app ej-microservices --values=values.yml --namespace ej-staging
                 '''
                 }
             }
-            steps {
-                script {
-                sh '''
-                rm -Rf .kube
-                mkdir .kube
-                ls
-                cat $KUBECONFIG > .kube/config
-                cp movie-service/values.yaml values.yml
-                cat values.yml
-                sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" values.yml
-                helm upgrade --install app movie-service --values=values.yml --namespace staging
-                '''
-                }
-            }
-
         }
-  stage('Deploiement en prod'){
+  stage('Deploiement en ej-prod'){
         environment
         {
         KUBECONFIG = credentials("config") // we retrieve  kubeconfig from secret file called config saved on jenkins
         }
             steps {
             // Create an Approval Button with a timeout of 15minutes.
-            // this require a manuel validation in order to deploy on production environment
+            // this require a manuel validation in order to deploy on ej-production environment
                     timeout(time: 15, unit: "MINUTES") {
-                        input message: 'Do you want to deploy in production ?', ok: 'Yes'
+                        input message: 'Do you want to deploy in ej-production ?', ok: 'Yes'
                     }
 
                 script {
@@ -195,28 +126,13 @@ stage('Deploiement en staging'){
                 mkdir .kube
                 ls
                 cat $KUBECONFIG > .kube/config
-                cp cast-service/values.yaml values.yml
+                cp helm/values.yaml values.yml
                 cat values.yml
                 sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" values.yml
-                helm upgrade --install app cast-service --values=values.yml --namespace prod
+                helm upgrade --install app ej-microservices --values=values.yml --namespace ej-prod
                 '''
                 }
             }
-            steps {
-                script {
-                sh '''
-                rm -Rf .kube
-                mkdir .kube
-                ls
-                cat $KUBECONFIG > .kube/config
-                cp movie-service/values.yaml values.yml
-                cat values.yml
-                sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" values.yml
-                helm upgrade --install app movie-service --values=values.yml --namespace prod
-                '''
-                }
-            }            
-
         }
 
 }
