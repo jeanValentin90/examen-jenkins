@@ -1,7 +1,7 @@
 movieService:
   image:
     repository: jeanvalentin90/examen-jenkins_movie_service
-    tag: latest
+    tag: 
   service:
     type: ClusterIP
     port: 8000

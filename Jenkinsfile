@@ -87,7 +87,7 @@ pipeline {
                     mkdir .kube
                     ls
                     cat $KUBECONFIG > .kube/config
-                    cp helm/values.yaml values.yml
+                    cp helm/values-staging.yaml values.yml
                     cat values.yml
                     sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" values.yml
                     helm upgrade ej-microservices helm/ --values=values.yml -n ej-staging
@@ -120,7 +120,7 @@ pipeline {
     }
     post {
         failure {
-            echo "This will run if the job failed"
+            echo "This will run if the job failed."
             mail to: "jean.valentin@outlook.com",
                  subject: "${env.JOB_NAME} - Build # ${env.BUILD_ID} has failed",
                  body: "For more info on the pipeline failure, check out the console output at ${env.BUILD_URL}"
