@@ -68,7 +68,7 @@ pipeline {
                     mkdir .kube
                     ls
                     cat $KUBECONFIG > .kube/config
-                    cp helm/values.yaml values.yml
+                    cp helm/values-dev.yaml values.yml
                     cat values.yml
                     sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" values.yml
                     helm upgrade --install app ej-microservices --values=values.yml --namespace ej-dev
@@ -109,7 +109,7 @@ pipeline {
                     mkdir .kube
                     ls
                     cat $KUBECONFIG > .kube/config
-                    cp helm/values.yaml values.yml
+                    cp helm/values-prod.yaml values.yml
                     cat values.yml
                     sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" values.yml
                     helm upgrade --install app ej-microservices --values=values.yml --namespace ej-prod

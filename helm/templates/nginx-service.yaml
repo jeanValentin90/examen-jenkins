@@ -7,6 +7,6 @@ spec:
   ports:
     - port: {{ .Values.nginx.service.port }}
       targetPort: {{ .Values.nginx.service.port }}
-      nodePort: 30000  
+      nodePort: {{ .Values.nginx.service.nodePort }}  
   selector:
     app: nginx

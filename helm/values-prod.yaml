@@ -26,8 +26,7 @@ nginx:
   service:
     type: NodePort
     port: 8080
-    nodePort: 30000
-
+    nodePort: 30003
 
 postgres:
   image: postgres:13
@@ -37,7 +36,7 @@ postgres:
   passwordb64: bW92aWVfZGJfcGFzc3dvcmQ=
   database: movie_db_dev
   databaseb64: bW92aWVfZGJfZGV2Cg==
-  nodePort: 30010
-
+  nodePort: 30013
+  
 persistentVolume:
   storage: 1Gi
