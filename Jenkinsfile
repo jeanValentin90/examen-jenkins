@@ -71,7 +71,7 @@ pipeline {
                     cp helm/values-dev.yaml values.yml
                     cat values.yml
                     sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" values.yml
-                    helm upgrade --install app ej-microservices --values=values.yml --namespace ej-dev
+                    helm upgrade ej-microservices helm/ --values=values.yml -n ej-dev
                     '''
                 }
             }
@@ -90,7 +90,7 @@ pipeline {
                     cp helm/values.yaml values.yml
                     cat values.yml
                     sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" values.yml
-                    helm upgrade --install app ej-microservices --values=values.yml --namespace ej-staging
+                    helm upgrade ej-microservices helm/ --values=values.yml -n ej-staging
                     '''
                 }
             }
@@ -112,7 +112,7 @@ pipeline {
                     cp helm/values-prod.yaml values.yml
                     cat values.yml
                     sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" values.yml
-                    helm upgrade --install app ej-microservices --values=values.yml --namespace ej-prod
+                    helm upgrade ej-microservices helm/ --values=values.yml -n ej-prod
                     '''
                 }
             }
